@@ -1,0 +1,6 @@
+
+android/.idea/
+
+*.lock
+
+example/.metadata
