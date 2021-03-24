@@ -72,22 +72,7 @@ class KpayFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             "generate_token" -> {
-                val tz = TimeZone.getTimeZone("UTC")
-                val df: DateFormat =
-                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'") // Quoted "Z" to indicate UTC, no timezone offset
-
-                df.timeZone = tz
-                val nowAsISO: String = df.format(Date())
-
-                java.util.Calendar.getInstance()
-                val userId = call.argument<String>("user_id")
-                val key = call.argument<String>("key")
-                val phone = call.argument<String>("phone")
-                val data =
-                        "{\"userId\":\"${userId.toString()}\",\"timestamp\":\"${nowAsISO}\",\"phone\":\"${phone.toString()}\"}"
-                Log.d("DATA", data)
-                val connectToken: String? = CryptoAES.encrypt(data, key)
-                result.success(connectToken)
+                result.success(generateToken(call))
             }
 
             "login" -> {
@@ -117,6 +102,25 @@ class KpayFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.notImplemented()
             }
         }
+    }
+
+    fun generateToken(@NonNull call: MethodCall): String? {
+        val tz = TimeZone.getTimeZone("UTC")
+        val df: DateFormat =
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'") // Quoted "Z" to indicate UTC, no timezone offset
+
+        df.timeZone = tz
+        val nowAsISO: String = df.format(Date())
+
+        java.util.Calendar.getInstance()
+        val userId = call.argument<String>("user_id")
+        val key = call.argument<String>("key")
+        val phone = call.argument<String>("phone")
+        val data =
+                "{\"userId\":\"${userId.toString()}\",\"timestamp\":\"${nowAsISO}\",\"phone\":\"${phone.toString()}\"}"
+        Log.d("DATA", data)
+        val connectToken: String? = CryptoAES.encrypt(data, key)
+        return connectToken
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {

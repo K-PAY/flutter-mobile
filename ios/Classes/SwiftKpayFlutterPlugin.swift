@@ -47,12 +47,7 @@ public class SwiftKpayFlutterPlugin: NSObject, FlutterPlugin {
         case "generate_token":
             
             if let userId = arguments?["user_id"] as? String, let key = arguments?["key"] as? String, let phone = arguments?["phone"] as? String {
-                let data : [String: Any] = ["timestamp": (Date().timeIntervalSince1970), "userId" : "\(userId)", "phone" : "\(phone)"]
-                print(data)
-                let params = try? JSONSerialization.data(withJSONObject: data)
-                let aes = try? AES(key: Array(key.utf8), blockMode: CBC(iv: [UInt8](repeating: 0, count: 16)), padding: .pkcs5)
-                let dataEncrypted = try? aes!.encrypt(Array(String(data: params!, encoding: .utf8)!.utf8))
-                 result(dataEncrypted!.toBase64()!)
+                result(generateToken(userId: userId, phone: phone, key: key))
             } else {
                 result(nil)
             }
@@ -111,13 +106,20 @@ public class SwiftKpayFlutterPlugin: NSObject, FlutterPlugin {
                 UIApplication.shared.keyWindow?.rootViewController = navigationController
                 UIApplication.shared.keyWindow?.makeKeyAndVisible()
                 
-                
             }
             break
         default:
             result(FlutterMethodNotImplemented)
             return
         }
+    }
+    private func generateToken(userId: String, phone: String, key: String) -> String{
+        let data : [String: Any] = ["timestamp": (Date().timeIntervalSince1970), "userId" : "\(userId)", "phone" : "\(phone)"]
+        print(data)
+        let params = try? JSONSerialization.data(withJSONObject: data)
+        let aes = try? AES(key: Array(key.utf8), blockMode: CBC(iv: [UInt8](repeating: 0, count: 16)), padding: .pkcs5)
+        let dataEncrypted = try? aes!.encrypt(Array(String(data: params!, encoding: .utf8)!.utf8))
+        return dataEncrypted!.toBase64()!
     }
 }
 
